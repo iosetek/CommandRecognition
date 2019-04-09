@@ -1,7 +1,9 @@
-import wavAnalyser
 import numpy as np
-from python_speech_features import mfcc
 import math
+
+from python_speech_features import mfcc
+
+import src.wavAnalyser
 
 class MFCCParser:
     """

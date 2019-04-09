@@ -1,4 +1,3 @@
-
 class Recorder:
     def __init__(self):
         """Init inits."""

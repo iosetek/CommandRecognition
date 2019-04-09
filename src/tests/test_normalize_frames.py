@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from mfcc import MFCCParser
+from src.mfcc import MFCCParser
 
 parser = MFCCParser(
     window_function=np.hamming,
