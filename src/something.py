@@ -1,9 +1,9 @@
 import numpy as np
 
 from src.recorder import Recorder
-from src.wavAnalyser import Sound
+from src.wav_analyser import Sound
 from src.mfcc import MFCCParser
-from src.plotDrawer import PlotDrawer
+from src.plot_drawer import PlotDrawer
 import src.extractor as extractor
 
 parser = MFCCParser(

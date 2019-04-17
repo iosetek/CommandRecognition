@@ -3,7 +3,7 @@ import math
 
 from python_speech_features import mfcc
 
-import src.wavAnalyser
+import src.wav_analyser
 
 class MFCCParser:
     """
@@ -128,12 +128,15 @@ class MFCCParser:
         return diff
 
     def normalize_to(self, init_data, value):
-        total_sum = self.__sum_up(init_data)
+        """
+        Multiplies each data to make the sum of the data equal to passed value.
+        """
+        total_sum = self.sum_up(init_data)
         ratio = value/math.fabs(total_sum)
         return self.__normalize(init_data, ratio)
 
     @staticmethod
-    def __sum_up(init_data):
+    def sum_up(init_data):
         result = 0
         for i in init_data:
             for j in i:
@@ -148,5 +151,12 @@ class MFCCParser:
                 normalized[i][j] = int(init_data[i][j] * ratio)
         return normalized
 
+    @staticmethod
+    def enlarge_each_cell_to_be_positive(init_data):
+        # TODO Find a better name for this method
+        min_val = init_data.min()
+        return np.array([cell - min_val for cell in [row for row in init_data]])
 
-
+    @staticmethod
+    def convert_to_int(init_data):
+        return np.array([cell for cell in [row for row in init_data]], dtype=int)

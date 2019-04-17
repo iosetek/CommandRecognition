@@ -1,6 +1,6 @@
 import glob, os
 from src.mfcc import MFCCParser
-from src.wavAnalyser import Sound
+from src.wav_analyser import Sound
 
 def extract_mfcc(parser, location, to):
     os.chdir(location)
