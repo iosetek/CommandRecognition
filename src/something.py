@@ -34,7 +34,7 @@ lowestDiff = 99999999
 commandWithLowestDiff = ""
 
 for command in commands:
-    for i in range(0, 3):
+    for i in range(3):
         x = parser.convert_to_n_frames(commands[command][i], 150)
         x = parser.normalize_to(x, 300)
         PlotDrawer.save("../Plots/" + command + " " + str(i) + ".png", x)

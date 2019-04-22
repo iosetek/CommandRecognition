@@ -52,7 +52,7 @@ class Sound:
         sounds = []
         samples_in_single_sound = int((self.rate / 1000) * timestamp)
         repeats = math.ceil(len(self.signal)/samples_in_single_sound)
-        for i in range(0, repeats):
+        for i in range(repeats):
             begin = i * samples_in_single_sound
             end = (i+1) * samples_in_single_sound
             if end > len(self.signal):

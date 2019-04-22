@@ -71,7 +71,7 @@ class MFCCParser:
         converted = np.array([[0] * self.cepstral_amount] * n, np.float)
         old_length = len(mfcc)
 
-        for i in range(0, n):
+        for i in range(n):
             previous_index = math.floor((i*old_length)/n)
             next_index = previous_index + 1
             
@@ -86,7 +86,7 @@ class MFCCParser:
             else:
                 next_value_weight = old_length - previous_value_weight
 
-            for j in range(0, self.cepstral_amount):
+            for j in range(self.cepstral_amount):
                 previous_value = mfcc[previous_index][j]
                 next_value = mfcc[next_index][j]
                 converted[i][j] = self.__get_mean_with_weight(
@@ -103,27 +103,27 @@ class MFCCParser:
         to_next_index = n
         last_index = 0
         old_length = len(mfcc)
-        for i in range(0, n):
+        for i in range(n):
 
-            for _ in range(0, old_length):
+            for _ in range(old_length):
                 if to_next_index == 0:
                     last_index += 1
                     to_next_index = n-1
                 else:
                     to_next_index -= 1
 
-                for j in range(0, self.cepstral_amount):
+                for j in range(self.cepstral_amount):
                     converted[i][j] += mfcc[last_index][j]
 
-            for j in range(0, self.cepstral_amount):
+            for j in range(self.cepstral_amount):
                 converted[i][j] = converted[i][j]/old_length
 
         return converted
 
     def get_difference(self, mfcc_a, mfcc_b):
         diff = 0
-        for i in range(0, len(mfcc_a)):
-            for j in range (0, self.cepstral_amount):
+        for i in range(len(mfcc_a)):
+            for j in range (self.cepstral_amount):
                 diff += math.pow(math.fabs(mfcc_a[i][j] - mfcc_b[i][j]), 2)
         return diff
 
@@ -146,8 +146,8 @@ class MFCCParser:
 
     def __normalize(self, init_data, ratio):
         normalized = np.array([[0] * self.cepstral_amount] * len(init_data), np.float)
-        for i in range(0, len(init_data)):
-            for j in range(0, self.cepstral_amount):
+        for i in range(len(init_data)):
+            for j in range(self.cepstral_amount):
                 normalized[i][j] = int(init_data[i][j] * ratio)
         return normalized
 
