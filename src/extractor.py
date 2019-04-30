@@ -1,8 +1,10 @@
 import glob, os
+
 from src.mfcc import MFCCParser
 from src.wav_analyser import Sound
 
 def extract_mfcc(parser, location, to):
+    saved_path = os.getcwd()
     os.chdir(location)
     files = glob.glob("*.wav")
     index = 1
@@ -21,6 +23,7 @@ def extract_mfcc(parser, location, to):
         print("%s/%s done." % (index, len(files)))
         index += 1
 
+    os.chdir(saved_path)
     return commands
 
 # extractMFCC("", "")

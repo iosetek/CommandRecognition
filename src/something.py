@@ -23,7 +23,9 @@ parser = MFCCParser(
 # mfccData = parser.toMFCC(soundTest)
 # PlotDrawer.draw(mfccData)
 
-commands = extractor.extract_mfcc(parser, "Sound/", "")
+def sounds_to_mfcc_data():
+    commands = extractor.extract_mfcc(parser, "Sound/", "")
+    
 
 soundTest = Sound(filename="../real.wav")
 mfccData = parser.to_mfcc(soundTest)

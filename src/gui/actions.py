@@ -1,5 +1,6 @@
-from src.gui.appJar.appjar import gui
 from src.api import Api
+from src.gui.appJar.appjar import gui
+
 
 class ActionsUI:
     def __init__(self, app):

@@ -141,7 +141,6 @@ class MFCCParser:
         for i in init_data:
             for j in i:
                 result += j
-        print(result)
         return result
 
     def __normalize(self, init_data, ratio):

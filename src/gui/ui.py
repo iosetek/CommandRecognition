@@ -1,5 +1,5 @@
-from src.gui.appJar.appjar import gui
 from src.gui.actions import ActionsUI
+from src.gui.appJar.appjar import gui
 from src.gui.command import CommandUI
 from src.gui.help import HelpUI
 from src.gui.menu import MenuUI
