@@ -13,13 +13,6 @@ class Gaussian:
         self.__sigma = sigma
         self.__normal = mvn(mi, sigma)
 
-    def compare_to_gaussian(self, other_gaussian):
-        """
-        Returns the difference between this and other gaussian
-        passed as a parameter.
-        """
-        print("TODO")
-
     # TODO Ensure this is correct
     # TODO Name it correctly
     def get_probability_for_position(self, x1, x2):
