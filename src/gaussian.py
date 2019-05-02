@@ -26,4 +26,20 @@ class Gaussian:
 
     def get_pi(self):
         return self.__pi
-    
+
+    def is_equal_with_gaussian(self, gaussian):
+        """
+        Returns true if the following gaussian has the same
+        pi, mean and variance as the other 2D gaussian.
+        """
+
+        if not math.isclose(self.__pi, gaussian.get_pi(), abs_tol=0.00001):
+            return False
+        for i in range(2):
+            if not math.isclose(self.__mi[i], gaussian.get_top_position()[i], abs_tol=0.00001):
+                return False
+        for i in range(2):
+            for j in range(2):
+                if not math.isclose(self.__sigma[i][j], gaussian.get_variances()[i][j], abs_tol=0.00001):
+                    return False
+        return True

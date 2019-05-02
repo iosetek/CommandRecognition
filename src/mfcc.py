@@ -183,3 +183,6 @@ class MFCC:
     def extract_gaussians(self, n_gaussians):
         self.enlarge_each_cell_to_be_positive()
         return em.estimate_n_gaussians_from_mfcc_data(self.__data, n_gaussians)
+
+    def get_data(self):
+        return self.__data

@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import math
 from src.mfcc import MFCC
-from src.mfcc import MFCCParser
 
 class TestEnlargeEachCell(unittest.TestCase):
     def test_decrease_values(self):
