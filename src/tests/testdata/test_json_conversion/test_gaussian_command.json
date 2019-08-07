@@ -1,0 +1,1 @@
+{"name": "test_gaussian_command", "gaussians": [{"pi": 3.11, "mean": [2.0, 1.6], "variances": [[2.0, 0.0], [0.0, 3.0]]}, {"pi": 5, "mean": [1.0, 2.2222], "variances": [[5.0, 0.0], [0.0, 1.1]]}]}

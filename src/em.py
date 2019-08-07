@@ -1,124 +1,127 @@
 import math
 import numpy as np
 import random
-
+import statistics
 from src.gaussian import Gaussian
+from src.super_vector import SuperVector
 
-def estimate_n_gaussians_from_mfcc_data(mfcc_data, n_gaussians, n_iterations=15):
-    """
-    Uses EM algorithm to estimate gaussian distributions for
-    passed mfcc data.\n
-    n_iterations - number of iterations. Usually 15 iterations are
-    enough, any next iteration slightly changes gaussians estimated
-    earlier.
-    """
-    gaussians = __pick_random_gaussians(mfcc_data, n_gaussians)
-    
-    for _ in range(n_iterations):
-        gaussians = single_em_iteration(gaussians, mfcc_data)
+supervectors_with_diff_dimensions_exception = "Super Vectors with different number of dimensions"
+not_enough_supervectors_exception = "Not enough Super Vectors"
+null_variance_exception = "Null Variance"
+
+
+def estimate_n_gaussians(svectors, n_gaussians, iterations):
+    __validate_vectors(svectors)
+
+    gaussians = __generate_random_gaussians(n_gaussians)
+
+    for i in range(iterations):
+        gaussians = __single_iteration(svectors, gaussians)
 
     return gaussians
 
 
-def __pick_random_gaussians(mfcc_data, n_gaussians):
+def __validate_vectors(svectors):
+    if len(svectors) == 0:
+        raise Exception("Cannot use EM algorithm without any super vector")
+    count_dimensions = svectors[0].dimensions()
+    for svec in iter(svectors):
+        if svec.dimensions() != count_dimensions:
+            raise Exception("Got super vector with different amount of dimensions than others")
+
+
+def __generate_random_gaussians(n_gaussians, n_dimensions):
     gaussians = []
-
-    frames_count = len(mfcc_data)
-    coefficients_count = len(mfcc_data[0])
-
-    ratio_mean_frames = frames_count / n_gaussians
-    ratio_mean_coefficients = coefficients_count / n_gaussians
-
-    pi = 1 / n_gaussians
-    sigma = np.array([[2, 0], [0, 2]], dtype=float)
-
     for i in range(n_gaussians):
-        # TODO Verify if this is correct
-        mean = np.array([ratio_mean_frames * i, ratio_mean_coefficients * i], dtype=float)
-        gaussians.append(Gaussian(pi, mean, sigma))
-
+        gaussians.append(Gaussian.generate_random_gaussian(n_dimensions))
     return gaussians
 
 
-def single_em_iteration(gaussians, mfcc_data):
-    estimations = __get_estimations(mfcc_data, gaussians)
-    for i in range(len(gaussians)):
-        pi = __get_pi_of_mfcc_data(mfcc_data, estimations[i])
-        mean = __get_mean_of_mfcc_data(mfcc_data, estimations[i])
-        sigma = __get_sigma_of_mfcc_data(mfcc_data, estimations[i], mean)
-        gaussians[i] = Gaussian(pi, mean, sigma)
-    return gaussians
+def __single_iteration(svectors, gaussians):
+    all_weigths = estimation_step(svectors, gaussians)
+    new_gaussians = []
+    for weights_from_single_gaussian in iter(all_weigths):
+        new_gaussians.append(maximization_step(svectors, weights_from_single_gaussian))
+    return weigths
 
 
-def __get_sum_of_mfcc_data(mfcc_data):
-    return sum(sum(mfcc_data))
+def estimation_step(svectors, gaussians):
+    probabilities = __calculate_probabilities_by_gaussians(svectors, gaussians)
+    return __probabilities_to_weights(probabilities)
 
 
-def __get_pi_of_mfcc_data(mfcc_data, estimations):
-    a = __get_sum_of_estimations(mfcc_data, estimations)
-    b = __get_sum_of_mfcc_data(mfcc_data)
-    return (a / b)
+def __calculate_probabilities_by_gaussians(svectors, gaussians):
+    probabilities = []
+    for gaussian in iter(gaussians):
+        probabilities_from_single_gaussian = []
+        for svec in iter(svectors):
+            probabilities_from_single_gaussian.append(gaussian.get_probability_for_position(svec))
+        probabilities.append(probabilities_from_single_gaussian)
+    return probabilities
 
 
-def __get_sum_of_estimations(mfcc_data, estimations):
-    result = 0
-    frames_count = len(mfcc_data)
-    coefficients_count = len(mfcc_data[0])
-    for i in range(frames_count):
-        for j in range(coefficients_count):
-            result += mfcc_data[i][j] * estimations[i][j]
-    return result
+def __probabilities_to_weights(probabilities):
+    sums = []
+    count_gaussians = len(probabilities)
+    count_svectors = len(probabilities[0])
+    for vector_id in range(count_svectors):
+        sums.append(__sum_probabilities(probabilities, vector_id))
+    
+    for vector_id in range(count_svectors):
+        for gaussian_id in range(count_gaussians):
+            probabilities[gaussian_id][vector_id] /= sums[vector_id]
+
+    return probabilities
+    
 
 
-def __get_mean_of_mfcc_data(mfcc_data, estimations):
-    # TODO Check order X/Y
-    frames_count = len(mfcc_data)
-    coefficients_count = len(mfcc_data[0])
-    mean = np.zeros((2))
-    for i in range(frames_count):
-        for j in range(coefficients_count):
-            # TODO Ensure if x, y should not be swapped
-            mean += mfcc_data[i][j] * estimations[i][j] * np.array([i, j])
-    return (mean / __get_sum_of_estimations(mfcc_data, estimations))
+def __sum_probabilities(probabilities, svec_id):
+    sum = 0
+    for gaussian_id in range(len(probabilities)):
+        sum += probabilities[gaussian_id][svec_id]
+    return sum
 
 
-def __get_sigma_of_mfcc_data(mfcc_data, estimations, mean):
-    # TODO This method is designed mostly for 2D data so maybe it should
-    # be explicit.
-    # TODO Check order X/Y
-    number_of_dimensions = 2
-    sigma = np.zeros((number_of_dimensions, number_of_dimensions))
-    frames_count = len(mfcc_data)
-    coefficients_count = len(mfcc_data[0])
-    for i in range(frames_count):
-        for j in range(coefficients_count):
-            # TODO Check if this reshape is necessary
-            # TODO Check if i/j has the right order
-            ys = np.reshape(np.array([i, j]) - mean, (2,1))
-            sigma += mfcc_data[i][j] * estimations[i, j] * np.dot(ys, ys.T)
-
-    return (sigma / __get_sum_of_estimations(mfcc_data, estimations))
+def maximization_step(svectors, weights):
 
 
-def __get_estimations(mfcc_data, gaussians):
-    """
-    E step.
-    """
-    # TODO Check if height/width order is correct
-    # TODO Keep one style: height/width or data/coefficients
-    frames_count = len(mfcc_data)
-    coefficients_count = len(mfcc_data[0])
-    estimations = np.zeros((len(gaussians), frames_count, coefficients_count))
-    summed_estimations = np.zeros((frames_count, coefficients_count))
-    for i in range(len(gaussians)):
-        for j in range(frames_count):
-            for k in range(coefficients_count):
-                estimation = gaussians[i].get_probability_for_position(j, k)
-                estimations[i][j][k] = estimation
-                summed_estimations[j][k] += estimation
 
-    for i in range(len(gaussians)):
-        estimations[i] /= summed_estimations
-    return estimations
+def __calculate_weigths(svectors, gaussians):
+    weigths = [0] * len(svectors)
+    # TODO
 
 
+def __super_vectors_mean(svectors, weights):
+    dimensions = svectors[0].dimensions()
+    mean = [0] * dimensions
+    for i in range(dimensions):
+        for svec_id in range(len(svectors)):
+            mean[i] += svectors[svec_id][i] * weights[svec_id]
+        mean[i] /= sum(weights)
+    return mean
+
+
+def __super_vectors_sigma(svectors, mean, weights):
+    dimensions = svectors[0].dimensions()
+    values_from_dimensions = __supervectors_to_array_of_values_for_each_dimension(svectors)
+    sigma = [[0] * dimensions] * dimensions
+    for i in range(dimensions):
+        for j in range(dimensions):
+            if i == j:
+                sigma[i][i] = np.var(values_from_dimensions[i], dtype=float)
+            else:
+                cov = np.cov(values_from_dimensions[i], values_from_dimensions[j])
+                sigma[i][j] = cov
+                sigma[j][i] = cov
+    return sigma
+
+
+def __supervectors_to_array_of_values_for_each_dimension(svectors):
+    dimensions = svectors[0].dimensions()
+    values = []
+    for i in range(dimensions):
+        values_from_dimension = []
+        for j in range(len(svectors)):
+            values_from_dimension.append(svectors[j].component(i))
+        values.append(values_from_dimension)
+    return values

@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import math
 
 from src.gaussian import Gaussian
 
@@ -53,3 +54,93 @@ class GaussianCommand:
     
     def get_name(self):
         return self.__name
+    
+
+    def get_diff_with_other_command_measuring_top_height(self, gauss_comm):
+        if len(self.__gaussians) != len(gauss_comm.get_gaussians()):
+            print("UNHANDLED SITUATION. TWO COMMANDS SHOULD HAVE EQUAL NUMBER OF GAUSSIANS")
+            return
+        self.ensure_gaussians_are_sorted()
+        gauss_comm.ensure_gaussians_are_sorted()
+        difference = 0
+
+        for i in range(len(self.__gaussians)):
+            difference += math.fabs(self.__gaussians[i].get_top_position()[1] - 
+                        gauss_comm.get_gaussians()[i].get_top_position()[1]) ** 3
+
+        return difference
+
+
+    def get_diff_with_other_command_measuring_top_height_and_differences_multiplied(self, gauss_comm):
+        if len(self.__gaussians) != len(gauss_comm.get_gaussians()):
+            print("UNHANDLED SITUATION. TWO COMMANDS SHOULD HAVE EQUAL NUMBER OF GAUSSIANS")
+            return
+        self.ensure_gaussians_are_sorted()
+        gauss_comm.ensure_gaussians_are_sorted()
+        diffPosition = 0
+
+        for i in range(len(self.__gaussians)):
+            diffPosition += math.fabs(self.__gaussians[i].get_top_position()[1] - 
+                        gauss_comm.get_gaussians()[i].get_top_position()[1]) ** 2
+
+        other_diff = 0
+        for i in range(1, len(self.__gaussians)):
+            orig_diff = self.__gaussians[i].get_top_position()[1] - self.__gaussians[i-1].get_top_position()[1]
+            oth_diff = gauss_comm.get_gaussians()[i].get_top_position()[1] - gauss_comm.get_gaussians()[i-1].get_top_position()[1]
+            other_diff += math.fabs(orig_diff - oth_diff) ** 4
+        return diffPosition * other_diff
+
+
+    def get_diff_with_other_command_measuring_top_height_and_differences_summed_up(self, gauss_comm):
+        if len(self.__gaussians) != len(gauss_comm.get_gaussians()):
+            print("UNHANDLED SITUATION. TWO COMMANDS SHOULD HAVE EQUAL NUMBER OF GAUSSIANS")
+            return
+        self.ensure_gaussians_are_sorted()
+        gauss_comm.ensure_gaussians_are_sorted()
+        diffPosition = 0
+
+        for i in range(len(self.__gaussians)):
+            diffPosition += math.fabs(self.__gaussians[i].get_top_position()[1] - 
+                        gauss_comm.get_gaussians()[i].get_top_position()[1]) ** 2
+
+        other_diff = 0
+        for i in range(1, len(self.__gaussians)):
+            orig_diff = self.__gaussians[i].get_top_position()[1] - self.__gaussians[i-1].get_top_position()[1]
+            oth_diff = gauss_comm.get_gaussians()[i].get_top_position()[1] - gauss_comm.get_gaussians()[i-1].get_top_position()[1]
+            other_diff += math.fabs(orig_diff - oth_diff) ** 0.5
+        return diffPosition + other_diff
+
+
+    def get_diff_with_other_command(self, gauss_comm):
+        if len(self.__gaussians) != len(gauss_comm.get_gaussians()):
+            print("UNHANDLED SITUATION. TWO COMMANDS SHOULD HAVE EQUAL NUMBER OF GAUSSIANS")
+            return
+        self.ensure_gaussians_are_sorted()
+        gauss_comm.ensure_gaussians_are_sorted()
+        diffPosition = 0
+
+        for i in range(len(self.__gaussians)):
+            diffPosition += math.fabs(self.__gaussians[i].get_top_position()[1] - 
+                        gauss_comm.get_gaussians()[i].get_top_position()[1]) ** 2
+            # diffVariance = math.fabs(self.__gaussians[i].get_variances()[1][1] - 
+            #             gauss_comm.get_gaussians()[i].get_variances()[1][1]) ** 2 
+            # difference += diffPosition * diffVariance
+
+        other_diff = 0
+        for i in range(1, len(self.__gaussians)):
+            orig_diff = self.__gaussians[i].get_top_position()[1] - self.__gaussians[i-1].get_top_position()[1]
+            oth_diff = gauss_comm.get_gaussians()[i].get_top_position()[1] - gauss_comm.get_gaussians()[i-1].get_top_position()[1]
+            other_diff += math.fabs(orig_diff - oth_diff) ** 4
+        return diffPosition * other_diff
+        
+
+    def ensure_gaussians_are_sorted(self):
+        gaussians_swapped = True
+        while gaussians_swapped:
+            gaussians_swapped = False
+            for i in range(1, len(self.__gaussians)):
+                if self.__gaussians[i].get_top_position()[0] < self.__gaussians[i-1].get_top_position()[0]:
+                    temp = self.__gaussians[i]
+                    self.__gaussians[i] = self.__gaussians[i-1]
+                    self.__gaussians[i-1] = temp
+                    gaussians_swapped = True
