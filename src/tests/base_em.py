@@ -16,7 +16,7 @@ def single_em(data_positions, pis, mus, sigmas):
 def e_step(data_positions, pis, mus, sigmas):
     number_of_gaussians = len(pis)
 
-    number_of_probes, number_of_dimensions = data_positions.shape 
+    number_of_probes, number_of_dimensions = data_positions.shape
 
     ws = np.zeros((number_of_gaussians, number_of_probes))
     for gaussian_id in range(number_of_gaussians):

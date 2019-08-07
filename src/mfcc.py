@@ -5,6 +5,7 @@ import scipy.io.wavfile as wav
 from python_speech_features import mfcc as mfcc_extractor
 
 import src.em as em
+import src.em3d as em3
 
 class MFCC:
     """
@@ -23,7 +24,7 @@ class MFCC:
     def from_track(cls, track_filename,
                     window_function = np.hamming, window_length = 0.03, distance_to_next_window = 0.01,
                     cepstral_amount = 13, filters_amount = 30,
-                    fft_size = 1024,
+                    fft_size = 2048,
                     append_energy = True,
                     low_freq = 0, max_freq = None,
                     preemph_filter = 0.97, cep_lifter = 22):
@@ -46,8 +47,8 @@ class MFCC:
         """
         rate, signal = wav.read(track_filename)
         return cls(mfcc_extractor(
-                signal=signal(),
-                samplerate=rate(),
+                signal=signal,
+                samplerate=rate,
                 winlen=window_length,
                 winstep=distance_to_next_window,
                 numcep=cepstral_amount,
@@ -148,41 +149,33 @@ class MFCC:
         return True
 
 
-    # TODO Find a better name for this method
-    def enlarge_each_cell_to_be_positive(self):
-        """
-        For given data it changes every value by the difference
-        between the smallest value and 0 so the smallest value
-        will be 0.\n
-        Example:\n
-        For given data [[3, -1], [-2, 5]] the result will be
-        [[5, 1], [0, 7]]
-        """
-        if self.__frames_count == 0 or self.__coefficients_count == 0:
-            return
-        min_val = self.__data.min()
-        self.__data = np.array([cell - min_val for cell in [row for row in self.__data]], dtype=float)
-
-
     def normalize_to(self, value):
         """
-        Multiplies each data to make the sum of the data equal to passed value.
+        Normalizes MFCC.
         """
-        if self.__frames_count == 0 or self.__coefficients_count == 0:
-            return
-        ratio = value/math.fabs(self.__data.sum())
-        self.__normalize(ratio)
+        # TODO
+        return
 
 
-    def __normalize(self, ratio):
-        for i in range(self.__frames_count):
-            for j in range(self.__coefficients_count):
-                self.__data[i][j] = self.__data[i][j] * ratio
-
-    
     def extract_gaussians(self, n_gaussians):
-        self.enlarge_each_cell_to_be_positive()
+        """
+        If limit is not none it will set to 0 each value which is lower than limit value.
+        """
         return em.estimate_n_gaussians_from_mfcc_data(self.__data, n_gaussians)
+
+
+    def remove_silence(self):
+        """
+        Removes frames which does not contain voice.
+        """
+        # TODO
+        return
+
 
     def get_data(self):
         return self.__data
+
+
+    def count_frames(self):
+        # TODO: Verify if number of frames variable is required.
+        return len(self.__data)

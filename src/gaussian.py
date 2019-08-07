@@ -1,45 +1,36 @@
-import math
-
 from scipy.stats import multivariate_normal as mvn
+import random
 
 class Gaussian:
     """
-    Gaussian object is simple representation of single 2D gauss distribution.
+    Gaussian object is simple representation of ND gauss distribution.
     """
+    def __init__(self, mean, cov):
+        self.__mean = mean
+        self.__cov = cov
+        self.__normal = mvn(mean, cov)
 
-    def __init__(self, pi, mi, sigma):
-        self.__pi = pi
-        self.__mi = mi
-        self.__sigma = sigma
-        self.__normal = mvn(mi, sigma)
 
-    # TODO Ensure this is correct
+    @classmethod
+    def generate_random_gaussian(cls, n_dimensions):
+        mean = [0] * n_dimensions
+        sigma = [[0] * n_dimensions] * n_dimensions
+
+        for i in range(n_dimensions):
+            mean[i] = random.randint(0, 1000) / 500
+            sigma[i][i] = random.randint(100, 1000) / 50
+
+        return Gaussian(mean, sigma)
+
+
     # TODO Name it correctly
-    def get_probability_for_position(self, x1, x2):
-        return self.__pi * self.__normal.pdf([x1, x2])
+    def get_probability_for_position(self, pos):
+        return self.__normal.pdf(pos)
 
-    def get_top_position(self):
-        return self.__mi
 
-    def get_variances(self):
-        return self.__sigma
+    def get_mean(self):
+        return self.__mean
 
-    def get_pi(self):
-        return self.__pi
 
-    def is_equal_with_gaussian(self, gaussian):
-        """
-        Returns true if the following gaussian has the same
-        pi, mean and variance as the other 2D gaussian.
-        """
-
-        if not math.isclose(self.__pi, gaussian.get_pi(), abs_tol=0.00001):
-            return False
-        for i in range(2):
-            if not math.isclose(self.__mi[i], gaussian.get_top_position()[i], abs_tol=0.00001):
-                return False
-        for i in range(2):
-            for j in range(2):
-                if not math.isclose(self.__sigma[i][j], gaussian.get_variances()[i][j], abs_tol=0.00001):
-                    return False
-        return True
+    def get_covariance(self):
+        return self.__cov

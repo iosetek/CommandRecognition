@@ -2,6 +2,7 @@ import json
 import numpy as np
 
 from src.mfcc import MFCC
+from src.plot_drawer import PlotDrawer
 
 class MfccCommand:
     """
@@ -37,6 +38,26 @@ class MfccCommand:
     def get_data(self):
         return self.__data
 
+
+    def normalize_to(self, value):
+        return self.__data.normalize_to(value)
+
     
     def get_name(self):
         return self.__name
+
+
+    def multiply_data(self, by):
+        self.__data.multiply_values(by)
+
+
+    def enlarge_each_cell_to_be_positive(self):
+        self.__data.enlarge_each_cell_to_be_positive()
+
+
+    def draw_mfcc(self):
+       PlotDrawer.draw(self.__data.get_data()) 
+
+    #TODO Delete this
+    def erase_some_mfcc(self):
+        self.__data.erase_some_mfcc()

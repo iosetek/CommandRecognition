@@ -1,5 +1,20 @@
 from src.gui.ui import Ui
+import src.command_converter as converter
 
-ui = Ui()
+import src.method_test as method
 
-ui.start()
+import numpy as np
+from scipy.stats import multivariate_normal as mvn
+from src.command.c_gaussian3d import Gaussian3Command
+from src.command.c_mfcc import MfccCommand
+
+from src.gaussian3d import Gaussian3
+
+converter.draw_all_mfcc_plots("data/commands/mfccs/10_commands", "data/commands/plots/10_commands_without_energy")
+
+
+# results = method.test_method()
+
+# ui = Ui()
+
+# ui.start()
