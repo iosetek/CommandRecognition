@@ -16,6 +16,7 @@ class SuperVector:
         Creates instance of SuperVector from 2D array.
         """
         array1d = []
+        data = mfcc.get_data()
         width = len(data)
         height = len(data[0])
         for i in range(width):
@@ -30,6 +31,10 @@ class SuperVector:
 
     def component(self, dimension_id):
         return self.__data[dimension_id]
+
+
+    def matrix(self):
+        return self.__data 
 
 
     def is_equal_to(self, vector, tolerance=0.0001):

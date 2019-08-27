@@ -14,3 +14,22 @@ class MFCCBank:
             filenames = soundbank.get_phrase_paths(phrase_name)
             mfcc_phrases.append(MFCCPhrase.convert_files_to_mfcc_phrase(phrase_name, filenames))
         return MFCCBank(phrase_names)
+
+
+    @classmethod
+    def load_mfccbank(cls, mfccbank_directory)
+        # TODO
+        return
+
+
+    def save_mfccbank(mfccbank_directory)
+        # TODO
+        return
+
+
+    def draw_mfcc_plots(destination)
+         # TODO
+        return
+
+
+    

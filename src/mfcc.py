@@ -5,7 +5,6 @@ import scipy.io.wavfile as wav
 from python_speech_features import mfcc as mfcc_extractor
 
 import src.em as em
-import src.em3d as em3
 
 class MFCC:
     """
@@ -157,11 +156,11 @@ class MFCC:
         return
 
 
-    def extract_gaussians(self, n_gaussians):
+    def extract_gaussians(self, n_gaussians, iterations):
         """
         If limit is not none it will set to 0 each value which is lower than limit value.
         """
-        return em.estimate_n_gaussians_from_mfcc_data(self.__data, n_gaussians)
+        return em.estimate_n_gaussians(self.__data, n_gaussians, iterations)
 
 
     def remove_silence(self):

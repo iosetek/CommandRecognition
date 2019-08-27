@@ -1,7 +1,5 @@
 import unittest
-import numpy as np
 import os
-import math
 from src.soundbank import Soundbank
 
 def get_absolute_path(path):

@@ -5,8 +5,68 @@ import math
 from src.super_vector import SuperVector
 from src.mfcc import MFCC
 import src.em as em
+from src.gaussian import Gaussian
 
-class TestEnlargeEachCell(unittest.TestCase):
+def are_gaussians_equal(actual_gaussians, expected_gaussians):
+    if len(actual_gaussians) != len(expected_gaussians):
+        return False
+    expected_ids_matched = dict()
+
+    for gaussian in iter(actual_gaussians):
+        for i in range(len(expected_gaussians)):
+            if gaussian.is_equal_to(expected_gaussians[i]) and i not in expected_ids_matched:
+                expected_ids_matched[i] = True
+                break
+        else:
+            return False
+    return True
+
+
+class TestEM(unittest.TestCase):
+    def test_are_gaussians_equal_helper_method(self):
+        first_list = []
+        second_list = []
+        self.assertTrue(are_gaussians_equal(first_list, second_list))
+
+        cov = np.array([[3, 0], [0, 2]], dtype=float)
+        gaussian_A = Gaussian(np.array([3, 5], dtype=float), cov)
+        gaussian_B = Gaussian(np.array([5, 3], dtype=float), cov)
+        gaussian_C = Gaussian(np.array([4, 4], dtype=float), cov)
+
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_A, gaussian_B, gaussian_C]
+        self.assertTrue(are_gaussians_equal(first_list, second_list))
+        
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_C, gaussian_B, gaussian_A]
+        self.assertTrue(are_gaussians_equal(first_list, second_list))
+
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_C, gaussian_A, gaussian_B]
+        self.assertTrue(are_gaussians_equal(first_list, second_list))
+
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_C, gaussian_A]
+        self.assertFalse(are_gaussians_equal(first_list, second_list))
+
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_A, gaussian_B, gaussian_B, gaussian_C]
+        self.assertFalse(are_gaussians_equal(first_list, second_list))
+
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_A, gaussian_B, gaussian_B, gaussian_C]
+        self.assertFalse(are_gaussians_equal(first_list, second_list))
+
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_A, gaussian_B, gaussian_B]
+        self.assertFalse(are_gaussians_equal(first_list, second_list))
+
+        gaussian_D = Gaussian(np.array([4, 4], dtype=float), cov)
+        first_list = [gaussian_A, gaussian_B, gaussian_C]
+        second_list = [gaussian_D, gaussian_B, gaussian_A]
+        self.assertTrue(are_gaussians_equal(first_list, second_list))
+
+
     def test_correct_number_of_estimated_gaussians(self):
         svectors = [
             SuperVector([1, 3, 2, 4]),
@@ -72,9 +132,8 @@ class TestEnlargeEachCell(unittest.TestCase):
 
 
     def test_estimating_from_empty_supervectors(self):
-        with self.assertRaises(Exception) as exc:
+        with self.assertRaises(em.NoSuperVectorsException):
             em.estimate_n_gaussians([], 1, 20)
-        self.assertTrue(em.not_enough_supervectors_exception in exc.exception)
 
 
     def test_estimating_from_supervectors_with_different_amount_of_dimensions(self):
@@ -82,9 +141,8 @@ class TestEnlargeEachCell(unittest.TestCase):
             SuperVector([0, 0]),
             SuperVector([0, 2, 4])
         ]
-        with self.assertRaises(Exception) as exc:
+        with self.assertRaises(em.DifferentNumberOfDimensionsException):
             em.estimate_n_gaussians(svectors, 1, 20)
-        self.assertTrue(em.supervectors_with_diff_dimensions_exception in exc.exception)
 
 
     def test_estimate_gaussian_from_supervectors_with_same_one_dimension(self):
@@ -95,9 +153,8 @@ class TestEnlargeEachCell(unittest.TestCase):
             SuperVector([4, 1, 2]),
             SuperVector([4, 5, 1]),
         ]
-        with self.assertRaises(Exception) as exc:
+        with self.assertRaises(em.NoVarianceException):
             em.estimate_n_gaussians(svectors, 1, 20)
-        self.assertTrue(em.null_variance_exception in exc.exception)
 
 
     def test_estimate_gaussian_from_supervectors_with_no_variance_at_all(self):
@@ -106,13 +163,11 @@ class TestEnlargeEachCell(unittest.TestCase):
             SuperVector([4, 4, 4]),
             SuperVector([4, 4, 4]),
         ]
-        with self.assertRaises(Exception) as exc:
+        with self.assertRaises(em.NoVarianceException):
             em.estimate_n_gaussians(svectors, 1, 20)
-        self.assertTrue(em.null_variance_exception in exc.exception)
 
 
     def test_estimate_gaussian_from_single_supervector(self):
         svectors = [SuperVector([0, 0])]
-        with self.assertRaises(Exception) as exc:
+        with self.assertRaises(em.NotEnoughSuperVectorsException):
             em.estimate_n_gaussians(svectors, 1, 20)
-        self.assertTrue(em.not_enough_supervectors_exception in exc.exception)
