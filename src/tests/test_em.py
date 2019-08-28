@@ -14,7 +14,7 @@ def are_gaussians_equal(actual_gaussians, expected_gaussians):
 
     for gaussian in iter(actual_gaussians):
         for i in range(len(expected_gaussians)):
-            if gaussian.is_equal_to(expected_gaussians[i]) and i not in expected_ids_matched:
+            if gaussian.is_equal_to(expected_gaussians[i], tolerance=0.1) and i not in expected_ids_matched:
                 expected_ids_matched[i] = True
                 break
         else:
@@ -70,7 +70,7 @@ class TestEM(unittest.TestCase):
     def test_correct_number_of_estimated_gaussians(self):
         svectors = [
             SuperVector([1, 3, 2, 4]),
-            SuperVector([3, 5, 2, 3])
+            SuperVector([3, 5, 5, 3])
         ]
 
         gaussians = em.estimate_n_gaussians(svectors, 1, 1)
@@ -80,7 +80,7 @@ class TestEM(unittest.TestCase):
         self.assertEqual(len(gaussians), 3, "Invalid number of estimated gaussians!")
 
         gaussians = em.estimate_n_gaussians(svectors, 18, 1)
-        self.assertEqual(len(gaussians), 7, "Invalid number of estimated gaussians!")
+        self.assertEqual(len(gaussians), 18, "Invalid number of estimated gaussians!")
 
 
     def test_estimating_one_gaussian(self):
@@ -90,18 +90,19 @@ class TestEM(unittest.TestCase):
         ]
         gaussians = em.estimate_n_gaussians(svectors, 1, 1)
 
-        expected_mean = [2, 4, 1.5]
-        expected_cov = [
-            [1,     1,      -0.5],
-            [1,     1,      -0.5],
-            [-0.5,  -0.5,   0.25]
-        ]
+        expected_mean = np.array([2, 4, 1.5], dtype=float)
+        expected_cov = np.array([
+            [1,     0,      0],
+            [0,     1,      0],
+            [0,  0,   0.25]
+        ], dtype=float)
 
-        self.assertEqual(gaussians[0].get_mean(), expected_mean, "Mean calculated incorrectly!")
-        self.assertEqual(gaussians[0].get_covariance(), expected_cov, "Covariance calculated incorrectly!")
+        expected_gaussians = [Gaussian(expected_mean, expected_cov)]
+
+        self.assertTrue(are_gaussians_equal(gaussians, expected_gaussians))
 
 
-    def test_estimating_two_gaussians(self):
+    def test_estimating_two_2d_gaussians(self):
         svectors = [
             SuperVector([0, 0]),
             SuperVector([0, 2]),
@@ -113,22 +114,84 @@ class TestEM(unittest.TestCase):
             SuperVector([4, 5]),
             SuperVector([6, 5]),
         ]
-        gaussians = em.estimate_n_gaussians(svectors, 1, 20)
+        gaussians = em.estimate_n_gaussians(svectors, 2, 40)
 
-        expected_first_mean = [1, 1]
-        expected_second_mean = [5, 5]
+        expected_first_mean = np.array([1, 1], dtype=float)
+        expected_second_mean = np.array([5, 5], dtype=float)
 
-        expected_first_cov = [[1, 0], [0, 1]]
-        expected_second_cov = [[0.4, 0], [0, 0.4]]
+        expected_first_cov = np.array([[1, 0], [0, 1]], dtype=float)
+        expected_second_cov = np.array([[0.4, 0], [0, 0.4]], dtype=float)
 
-        if gaussians[0].get_mean()[0] > gaussians[1].get_mean()[0]:
-            gaussians.reverse()
+        expected_gaussians = [Gaussian(expected_first_mean, expected_first_cov), 
+            Gaussian(expected_second_mean, expected_second_cov)]
 
-        self.assertEqual(gaussians[0].get_mean(), expected_first_mean, "Mean calculated incorrectly!")
-        self.assertEqual(gaussians[0].get_covariance(), expected_first_cov, "Covariance calculated incorrectly!")
+        self.assertTrue(are_gaussians_equal(gaussians, expected_gaussians))
 
-        self.assertEqual(gaussians[1].get_mean(), expected_second_mean, "Mean calculated incorrectly!")
-        self.assertEqual(gaussians[1].get_covariance(), expected_second_cov, "Covariance calculated incorrectly!")
+
+    def test_estimating_two_3d_gaussians(self):
+        svectors = [
+            SuperVector([0, 0, 0]),
+            SuperVector([0, 2, 0]),
+            SuperVector([2, 0, 0]),
+            SuperVector([2, 2, 0]),
+            SuperVector([0, 0, 2]),
+            SuperVector([0, 2, 2]),
+            SuperVector([2, 0, 2]),
+            SuperVector([2, 2, 2]),
+
+            SuperVector([5, 5, 5]),
+            SuperVector([5, 4, 5]),
+            SuperVector([5, 6, 5]),
+            SuperVector([4, 5, 5]),
+            SuperVector([6, 5, 5]),
+            SuperVector([5, 5, 4]),
+            SuperVector([5, 5, 6]),
+        ]
+        gaussians = em.estimate_n_gaussians(svectors, 2, 7)
+
+        expected_first_mean = np.array([1, 1, 1], dtype=float)
+        expected_second_mean = np.array([5, 5, 5], dtype=float)
+
+        expected_first_cov = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=float)
+        expected_second_cov = np.array([[0.285714, 0, 0], [0, 0.285714, 0], [0, 0, 0.285714]], dtype=float)
+
+        expected_gaussians = [Gaussian(expected_first_mean, expected_first_cov), 
+            Gaussian(expected_second_mean, expected_second_cov)]
+
+        self.assertTrue(are_gaussians_equal(gaussians, expected_gaussians))
+
+
+    def test_estimating_three_2d_gaussians(self):
+        svectors = [
+            SuperVector([0, 0]),
+            SuperVector([0, 2]),
+            SuperVector([2, 0]),
+            SuperVector([2, 2]),
+            SuperVector([7, 9]),
+            SuperVector([9, 7]),
+            SuperVector([7, 7]),
+            SuperVector([9, 9]),
+            SuperVector([5, 5]),
+            SuperVector([5, 4]),
+            SuperVector([5, 6]),
+            SuperVector([4, 5]),
+            SuperVector([6, 5]),
+        ]
+        gaussians = em.estimate_n_gaussians(svectors, 3, 13)
+
+        expected_first_mean = np.array([1, 1], dtype=float)
+        expected_second_mean = np.array([8, 8], dtype=float)
+        expected_third_mean = np.array([5, 5], dtype=float)
+
+        expected_first_cov = np.array([[1, 0], [0, 1]], dtype=float)
+        expected_second_cov = np.array([[1, 0], [0, 1]], dtype=float)
+        expected_third_cov = np.array([[0.4, 0], [0, 0.4]], dtype=float)
+
+        expected_gaussians = [Gaussian(expected_first_mean, expected_first_cov), 
+            Gaussian(expected_second_mean, expected_second_cov),
+            Gaussian(expected_third_mean, expected_third_cov)]
+
+        self.assertTrue(are_gaussians_equal(gaussians, expected_gaussians))
 
 
     def test_estimating_from_empty_supervectors(self):

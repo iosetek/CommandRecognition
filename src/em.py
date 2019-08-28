@@ -17,13 +17,16 @@ class NotEnoughSuperVectorsException(Exception):
 class NoVarianceException(Exception):
     pass
 
+
 def estimate_n_gaussians(svectors, n_gaussians, iterations):
     __validate_vectors(svectors)
 
     gaussians = __generate_random_gaussians(n_gaussians, svectors[0].dimensions())
 
+    powers = [1] * len(gaussians)
+
     for _ in range(iterations):
-        gaussians = __single_iteration(svectors, gaussians)
+        gaussians, powers = __single_iteration(svectors, gaussians, powers)
 
     return gaussians
 
@@ -46,60 +49,62 @@ def __generate_random_gaussians(n_gaussians, n_dimensions):
     return gaussians
 
 
-def __single_iteration(svectors, gaussians):
-    all_weigths = estimation_step(svectors, gaussians)
+def __single_iteration(svectors, gaussians, powers):
+    """
+    Weights is a two dimensional list.
+    weights[i] gives the power of each supervector from i-gaussian
+    weights[i][j] gives the power of j-supervector from i-gaussian
+    """
+    all_weights, new_powers = estimation_step(svectors, gaussians, powers)
     new_gaussians = []
-    for weights_from_single_gaussian in iter(all_weigths):
+    for weights_from_single_gaussian in iter(all_weights):
         new_gaussians.append(maximization_step(svectors, weights_from_single_gaussian))
-    return new_gaussians
+    return new_gaussians, new_powers
 
 
-def estimation_step(svectors, gaussians):
-    probabilities = __calculate_probabilities_by_gaussians(svectors, gaussians)
-    return __probabilities_to_weights(probabilities)
+def estimation_step(svectors, gaussians, powers):
+    probabilities = __calculate_probabilities_by_gaussians(svectors, gaussians, powers)
+    # Should powers be calculated before or after probabilities?
+    
+    weights = __probabilities_to_weights(probabilities)
+    new_powers = __get_gaussian_powers_from_weights(weights)
+    return weights, new_powers
 
 
-def __calculate_probabilities_by_gaussians(svectors, gaussians):
+def __get_gaussian_powers_from_weights(probabilities):
+    powers = []
+    for p in iter(probabilities):
+        powers.append(sum(p) / len(p))
+    return powers
+
+
+def __calculate_probabilities_by_gaussians(svectors, gaussians, powers):
     probabilities = []
-    for gaussian in iter(gaussians):
+    for i in range(len(gaussians)):
         probabilities_from_single_gaussian = []
         for svec in iter(svectors):
-            probabilities_from_single_gaussian.append(gaussian.get_probability_for_position(svec.matrix()))
+            probabilities_from_single_gaussian.append(powers[i] * gaussians[i].get_probability_for_position(svec.matrix()))
         probabilities.append(probabilities_from_single_gaussian)
     return probabilities
 
 
 def __probabilities_to_weights(probabilities):
-    sums = []
-    count_gaussians = len(probabilities)
-    count_svectors = len(probabilities[0])
-    for vector_id in range(count_svectors):
-        sums.append(__sum_probabilities(probabilities, vector_id))
+    weights = []
+    sums = np.array([0] * len(probabilities[0]), dtype=float)
+    for p in iter(probabilities):
+        weights.append(np.array(p, dtype=float))
+        sums += weights[len(weights)-1]
     
-    for vector_id in range(count_svectors):
-        for gaussian_id in range(count_gaussians):
-            probabilities[gaussian_id][vector_id] /= sums[vector_id]
-
-    return probabilities
+    for i in range(len(weights)):
+        weights[i] /= sums
     
-
-
-def __sum_probabilities(probabilities, svec_id):
-    sum = 0
-    for gaussian_id in range(len(probabilities)):
-        sum += probabilities[gaussian_id][svec_id]
-    return sum
+    return weights
 
 
 def maximization_step(svectors, weights):
     mean = __super_vectors_mean(svectors, weights)
     sigma = __super_vectors_sigma(svectors, mean, weights)
     return Gaussian(mean, sigma)
-
-
-def __calculate_weigths(svectors, gaussians):
-    weigths = [0] * len(svectors)
-    # TODO
 
 
 def __super_vectors_mean(svectors, weights):
@@ -117,18 +122,18 @@ def __super_vectors_sigma(svectors, mean, weights):
     values_from_dimensions = __supervectors_to_array_of_values_for_each_dimension(svectors)
     sigma = np.array([[0] * dimensions] * dimensions, dtype=float)
     for i in range(dimensions):
-        for j in range(dimensions):
-            if i == j:
-                sigma[i][i] = np.var(values_from_dimensions[i], dtype=float)
-                if math.isclose(sigma[i][i], 0, abs_tol=0.00001):
-                    raise NoVarianceException
-            else:
-                cov = np.cov(values_from_dimensions[i], values_from_dimensions[j])
-                # TODO: Calculate only one field from that covariance matrix
-                covs = cov[0][1]
-                sigma[i][j] = covs
-                sigma[j][i] = covs
+        sigma[i][i] = __weighted_variance(mean[i], values_from_dimensions[i], weights)
+        if math.isclose(sigma[i][i], 0, abs_tol=0.00001):
+            raise NoVarianceException
     return sigma
+
+
+def __weighted_variance(mean, values, weights):
+    result = 0
+    for i in range(len(values)):
+        result += ((values[i]-mean)**2) * weights[i]
+    result /= sum(weights)
+    return result
 
 
 def __supervectors_to_array_of_values_for_each_dimension(svectors):

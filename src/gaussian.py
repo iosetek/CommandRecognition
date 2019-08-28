@@ -61,7 +61,7 @@ class Gaussian:
         return self.__cov
 
 
-    def is_equal_to(self, gaussian, tolerance=0.00001):
+    def is_equal_to(self, gaussian, tolerance=0.0001):
         if len(self.__mean) != len(gaussian.get_mean()):
             return False
         if len(self.__cov) != len(gaussian.get_covariance()):
