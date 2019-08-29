@@ -17,17 +17,17 @@ class MFCCBank:
 
 
     @classmethod
-    def load_mfccbank(cls, mfccbank_directory)
+    def load_mfccbank(cls, mfccbank_directory):
         # TODO
         return
 
 
-    def save_mfccbank(mfccbank_directory)
+    def save_mfccbank(self, mfccbank_directory):
         # TODO
         return
 
 
-    def draw_mfcc_plots(destination)
+    def draw_mfcc_plots(self, destination):
          # TODO
         return
 

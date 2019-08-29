@@ -1,0 +1,6 @@
+config:
+  training_records:
+  - data/commands/tracks
+  - data/commands/tracks-ania
+  test_records:
+  - data/commands/test-records

@@ -1,0 +1,5 @@
+config:
+  training_records:
+  - data/commands/tracks
+  - data/commands/tracks-ania
+  em_repeats: 20

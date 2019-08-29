@@ -1,0 +1,5 @@
+config:
+  training_records: 3
+  test_records:
+  - data/commands/test-records
+  em_repeats: 20
