@@ -13,18 +13,18 @@ class MFCCBank:
         for phrase_name in iter(phrase_names):
             filenames = soundbank.get_phrase_paths(phrase_name)
             mfcc_phrases.append(MFCCPhrase.convert_files_to_mfcc_phrase(phrase_name, filenames))
-        return MFCCBank(phrase_names)
+        return MFCCBank(mfcc_phrases)
 
 
     def remove_silent_frames(self):
         for i in range(len(self.__phrases)):
-            self.__phrases[i].remove_silence()
+            self.__phrases[i].remove_silent_frames()
 
 
     def discretize_phrases_length(self, step):
         for i in range(len(self.__phrases)):
             avg_time = self.__phrases[i].average_time()
-            self.__phrases[i].convert_to_n_frames(round(avg_time/step, 0))
+            self.__phrases[i].convert_to_n_frames(int(round(avg_time/step, 0)))
 
 
     def count_phrases(self):

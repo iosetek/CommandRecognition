@@ -13,4 +13,4 @@ class Command:
         for i in range(mfccphrase.count_mfccs()):
             vectors.append(SuperVector.init_from_mfcc(mfccphrase.get_mfcc(i)))
         gaussians = em.estimate_n_gaussians(vectors, em_gaussians, em_iterations)
-        return Command(mfccphrase.name, gaussians)
+        return Command(mfccphrase.get_name(), gaussians)

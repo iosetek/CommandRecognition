@@ -21,7 +21,7 @@ class Soundbank:
     def __get_record_files_from(self, location):
         filenames = self.__get_filepaths_from_directory(location)
         for filename in iter(filenames):
-            self.__add_record_to_bank(filename)
+            self.__add_record_to_bank(os.path.join(location, filename))
 
 
     def __get_filepaths_from_directory(self, location):

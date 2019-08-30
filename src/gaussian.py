@@ -42,7 +42,7 @@ class Gaussian:
             for j in range(n_dimensions):
                 sigma[i][j] = 0.001
             mean[i] = random.randint(0, 1000) / 500
-            sigma[i][i] = random.randint(100, 1000) / 50
+            sigma[i][i] = random.randint(100, 1000) / 0.5
 
         return Gaussian(mean, sigma)
 
