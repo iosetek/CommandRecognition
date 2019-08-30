@@ -52,5 +52,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(c.training_paths, ["data/commands/tracks", "data/commands/tracks-ania"])
         self.assertEqual(c.test_paths, ["data/commands/test-records"])
         self.assertEqual(c.em_repeats, 20)
+        self.assertEqual(c.discretization_step, 50)
+        self.assertEqual(c.gaussians_count, 2)
 
 

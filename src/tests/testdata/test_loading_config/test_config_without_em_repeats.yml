@@ -4,3 +4,5 @@ config:
   - data/commands/tracks-ania
   test_records:
   - data/commands/test-records
+  discretization_step: 50
+  gaussians_count: 2

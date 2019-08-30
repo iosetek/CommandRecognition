@@ -27,6 +27,10 @@ class Config:
             raise Config.MissingTestRecordsException
         if self.__EM_REPEATS not in c[self.__CONFIG]:
             raise Config.MissingEMRepeatsException
+        if self.__DISCRETIZATION_STEP not in c[self.__CONFIG]:
+            raise Config.MissingDiscretizationStepException
+        if self.__GAUSSIANS_COUNT not in c[self.__CONFIG]:
+            raise Config.MissingGaussiansCountException
 
 
     def __validate_value_types(self, c):
@@ -36,18 +40,26 @@ class Config:
             raise Config.TestPathsFieldIsNotListException
         if not isinstance(c[self.__CONFIG][self.__EM_REPEATS], int):
             raise Config.EMRepeatsFieldIsNotIntigerException
+        if not isinstance(c[self.__CONFIG][self.__DISCRETIZATION_STEP], int):
+            raise Config.DiscretizationStepIsNotIntigerException
+        if not isinstance(c[self.__CONFIG][self.__GAUSSIANS_COUNT], int):
+            raise Config.GaussiansCountIsNotIntigerException
 
 
     def __save_configuration(self, c):
         self.training_paths = c[self.__CONFIG][self.__TRAINING_RECORDS]
         self.test_paths = c[self.__CONFIG][self.__TEST_RECORDS]
         self.em_repeats = c[self.__CONFIG][self.__EM_REPEATS]
+        self.discretization_step = c[self.__CONFIG][self.__DISCRETIZATION_STEP]
+        self.gaussians_count = c[self.__CONFIG][self.__GAUSSIANS_COUNT]
 
 
     __CONFIG = "config"
     __TRAINING_RECORDS = "training_records"
     __TEST_RECORDS = "test_records"
     __EM_REPEATS = "em_repeats"
+    __DISCRETIZATION_STEP = "discretization_step"
+    __GAUSSIANS_COUNT = "gaussians_count"
 
 
     class MissingTestRecordsException(Exception):
@@ -66,6 +78,14 @@ class Config:
         pass
 
 
+    class MissingDiscretizationStepException(Exception):
+        pass
+
+
+    class MissingGaussiansCountException(Exception):
+        pass
+
+
     class InvalidYamlFileException(Exception):
         pass
 
@@ -79,4 +99,12 @@ class Config:
 
 
     class EMRepeatsFieldIsNotIntigerException(Exception):
+        pass
+
+
+    class DiscretizationStepIsNotIntigerException(Exception):
+        pass
+
+
+    class GaussiansCountIsNotIntigerException(Exception):
         pass

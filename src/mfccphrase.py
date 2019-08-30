@@ -39,4 +39,9 @@ class MFCCPhrase:
         return self.__mfccs[id]
 
 
+    def convert_to_n_frames(self, n):
+        for i in range(len(self.__mfccs)):
+            self.__mfccs[i].convert_to_n_frames(n)
+
+
     

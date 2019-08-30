@@ -16,6 +16,25 @@ class MFCCBank:
         return MFCCBank(phrase_names)
 
 
+    def remove_silent_frames(self):
+        for i in range(len(self.__phrases)):
+            self.__phrases[i].remove_silence()
+
+
+    def discretize_phrases_length(self, step):
+        for i in range(len(self.__phrases)):
+            avg_time = self.__phrases[i].average_time()
+            self.__phrases[i].convert_to_n_frames(round(avg_time/step, 0))
+
+
+    def count_phrases(self):
+        return len(self.__phrases)
+
+
+    def get_phrase(self, index):
+        return self.__phrases[index]
+
+
     @classmethod
     def load_mfccbank(cls, mfccbank_directory):
         # TODO

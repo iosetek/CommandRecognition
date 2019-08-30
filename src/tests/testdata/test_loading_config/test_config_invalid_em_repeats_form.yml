@@ -6,3 +6,5 @@ config:
   - data/commands/test-records
   em_repeats:
     test: test
+  discretization_step: 50
+  gaussians_count: 2
