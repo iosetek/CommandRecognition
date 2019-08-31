@@ -10,7 +10,13 @@ class Gaussian:
         self.__mean = mean
         self.__cov = cov
         self.__validate()
-        self.__normal = mvn(mean, cov, allow_singular=True)
+        try:
+            self.__normal = mvn(mean, cov, allow_singular=True)
+        except ValueError:
+            print(cov)
+            raise IOError
+
+        
 
 
     def __validate(self):
@@ -41,7 +47,7 @@ class Gaussian:
             # TODO: Multivariate normal should accept 0 values, not require just a small value.
             for j in range(n_dimensions):
                 sigma[i][j] = 0.001
-            mean[i] = random.randint(0, 1000) / 500
+            mean[i] = random.randint(800, 1000) / 500
             sigma[i][i] = random.randint(100, 1000) / 0.5
 
         return Gaussian(mean, sigma)

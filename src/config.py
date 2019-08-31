@@ -31,6 +31,12 @@ class Config:
             raise Config.MissingDiscretizationStepException
         if self.__GAUSSIANS_COUNT not in c[self.__CONFIG]:
             raise Config.MissingGaussiansCountException
+        if self.__TRAINING_SUPERVECTORS not in c[self.__CONFIG]:
+            raise Config.MissingTrainingSupervectorsException
+        if self.__TEST_SUPERVECTORS not in c[self.__CONFIG]:
+            raise Config.MissingTestSupervectorsException
+        if self.__START_FROM not in c[self.__CONFIG]:
+            raise Config.MissingStartFromException
 
 
     def __validate_value_types(self, c):
@@ -44,6 +50,20 @@ class Config:
             raise Config.DiscretizationStepIsNotIntigerException
         if not isinstance(c[self.__CONFIG][self.__GAUSSIANS_COUNT], int):
             raise Config.GaussiansCountIsNotIntigerException
+        if not isinstance(c[self.__CONFIG][self.__TRAINING_SUPERVECTORS], str):
+            raise Config.TrainingSupervectorsFieldIsNotStringException
+        if not isinstance(c[self.__CONFIG][self.__TEST_SUPERVECTORS], str):
+            raise Config.TestSupervectorsFieldIsNotStringException
+        if not isinstance(c[self.__CONFIG][self.__START_FROM], str) and \
+            not self.__is_proper_start_from(c[self.__CONFIG][self.__START_FROM]):
+            raise Config.StartFromFieldIsNotValidException
+
+
+    def __is_proper_start_from(self, value):
+        if value == self.FROM_START and value == self.USE_READY_MFCC_BANK:
+            return True
+        return False
+
 
 
     def __save_configuration(self, c):
@@ -52,6 +72,9 @@ class Config:
         self.em_repeats = c[self.__CONFIG][self.__EM_REPEATS]
         self.discretization_step = c[self.__CONFIG][self.__DISCRETIZATION_STEP]
         self.gaussians_count = c[self.__CONFIG][self.__GAUSSIANS_COUNT]
+        self.training_supervectors = c[self.__CONFIG][self.__TRAINING_SUPERVECTORS]
+        self.test_supervectors = c[self.__CONFIG][self.__TEST_SUPERVECTORS]
+        self.start_from = c[self.__CONFIG][self.__START_FROM]
 
 
     __CONFIG = "config"
@@ -60,6 +83,14 @@ class Config:
     __EM_REPEATS = "em_repeats"
     __DISCRETIZATION_STEP = "discretization_step"
     __GAUSSIANS_COUNT = "gaussians_count"
+    __TRAINING_SUPERVECTORS = "training_supervectors"
+    __TEST_SUPERVECTORS = "test_supervectors"
+    __START_FROM = "start_from"
+
+    
+    FROM_START = "FROM_START"
+    USE_READY_MFCC_BANK = "USE_READY_MFCC_BANK"
+
 
 
     class MissingTestRecordsException(Exception):
@@ -86,6 +117,18 @@ class Config:
         pass
 
 
+    class MissingTrainingSupervectorsException(Exception):
+        pass
+
+
+    class MissingTestSupervectorsException(Exception):
+        pass
+
+
+    class MissingStartFromException(Exception):
+        pass
+
+
     class InvalidYamlFileException(Exception):
         pass
 
@@ -107,4 +150,16 @@ class Config:
 
 
     class GaussiansCountIsNotIntigerException(Exception):
+        pass
+
+
+    class TrainingSupervectorsFieldIsNotStringException(Exception):
+        pass
+
+
+    class TestSupervectorsFieldIsNotStringException(Exception):
+        pass
+
+
+    class StartFromFieldIsNotValidException(Exception):
         pass

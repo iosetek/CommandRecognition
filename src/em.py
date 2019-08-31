@@ -123,8 +123,10 @@ def __super_vectors_sigma(svectors, mean, weights):
     sigma = np.array([[0] * dimensions] * dimensions, dtype=float)
     for i in range(dimensions):
         sigma[i][i] = __weighted_variance(mean[i], values_from_dimensions[i], weights)
-        if math.isclose(sigma[i][i], 0, abs_tol=0.00001):
-            raise NoVarianceException
+        if math.isclose(sigma[i][i], 0, abs_tol=3.0e-20):
+            # print(sigma[i][i])
+            # raise NoVarianceException
+            sigma[i][i] = 3.0e-20
     return sigma
 
 

@@ -1,5 +1,6 @@
 from statistics import mean
 from src.mfcc import MFCC
+import numpy as np
 
 class MFCCPhrase:
     def __init__(self, name, mfccs):
@@ -47,6 +48,27 @@ class MFCCPhrase:
     def convert_to_n_frames(self, n):
         for i in range(len(self.__mfccs)):
             self.__mfccs[i].convert_to_n_frames(n)
+
+
+    @classmethod
+    def from_json_object(self, obj):
+        name = obj["name"]
+        mfccs = obj["mfccs"]
+        parsed_mfccs = []
+        for m in iter(mfccs):
+            parsed_mfccs.append(MFCC(np.array(m, dtype=float)))
+        return MFCCPhrase(name, parsed_mfccs)
+
+
+    def to_json_object(self):
+        obj = dict()
+        obj["name"] = self.__name
+        mfccs = []
+        for m in iter(self.__mfccs):
+            mfccs.append(m.get_data().tolist())
+        obj["mfccs"] = mfccs
+        return obj
+
 
 
     
