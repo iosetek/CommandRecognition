@@ -1,8 +1,0 @@
-config:
-  training_records:
-  - data/commands/tracks
-  - data/commands/tracks-ania
-  test_records: "test"
-  em_repeats: 20
-  discretization_step: 50
-  gaussians_count: 2
