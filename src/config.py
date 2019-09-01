@@ -48,6 +48,7 @@ class Config:
         self.training_supervectors = c[self.__CONFIG][self.__TRAINING_SUPERVECTORS]
         self.test_supervectors = c[self.__CONFIG][self.__TEST_SUPERVECTORS]
         self.start_from = c[self.__CONFIG][self.__START_FROM]
+        self.em_reserve = c[self.__CONFIG][self.__EM_RESERVE]
 
 
     def __get_parameters(self):
@@ -59,7 +60,8 @@ class Config:
             {Config.__VALUE:Config.__GAUSSIANS_COUNT, Config.__TYPE:int},
             {Config.__VALUE:Config.__TRAINING_SUPERVECTORS, Config.__TYPE:str},
             {Config.__VALUE:Config.__TEST_SUPERVECTORS, Config.__TYPE:str},
-            {Config.__VALUE:Config.__START_FROM, Config.__TYPE:str}]
+            {Config.__VALUE:Config.__START_FROM, Config.__TYPE:str},
+            {Config.__VALUE:Config.__EM_RESERVE, Config.__TYPE:int}]
 
 
     __VALUE = "val"
@@ -75,6 +77,7 @@ class Config:
     __TRAINING_SUPERVECTORS = "training_supervectors"
     __TEST_SUPERVECTORS = "test_supervectors"
     __START_FROM = "start_from"
+    __EM_RESERVE = "em_reserve"
 
     
     FROM_START = "FROM_START"

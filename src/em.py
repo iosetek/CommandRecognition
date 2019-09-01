@@ -18,7 +18,7 @@ class NoVarianceException(Exception):
     pass
 
 
-def estimate_n_gaussians(svectors, n_gaussians, iterations):
+def estimate_n_gaussians(svectors, n_gaussians, iterations, em_reserve=0):
     __validate_vectors(svectors)
 
     gaussians = __generate_random_gaussians(n_gaussians, svectors[0].dimensions(), svectors[0])
@@ -26,7 +26,7 @@ def estimate_n_gaussians(svectors, n_gaussians, iterations):
     powers = [1] * len(gaussians)
 
     for _ in range(iterations):
-        gaussians, powers = __single_iteration(svectors, gaussians, powers)
+        gaussians, powers = __single_iteration(svectors, gaussians, powers, em_reserve=em_reserve)
 
     return gaussians
 
@@ -49,21 +49,21 @@ def __generate_random_gaussians(n_gaussians, n_dimensions, one_vector):
     return gaussians
 
 
-def __single_iteration(svectors, gaussians, powers):
+def __single_iteration(svectors, gaussians, powers, em_reserve=0):
     """
     Weights is a two dimensional list.
     weights[i] gives the power of each supervector from i-gaussian
     weights[i][j] gives the power of j-supervector from i-gaussian
     """
-    all_weights, new_powers = estimation_step(svectors, gaussians, powers)
+    all_weights, new_powers = estimation_step(svectors, gaussians, powers, em_reserve=em_reserve)
     new_gaussians = []
     for weights_from_single_gaussian in iter(all_weights):
         new_gaussians.append(maximization_step(svectors, weights_from_single_gaussian))
     return new_gaussians, new_powers
 
 
-def estimation_step(svectors, gaussians, powers):
-    probabilities = __calculate_probabilities_by_gaussians(svectors, gaussians, powers)
+def estimation_step(svectors, gaussians, powers, em_reserve=0):
+    probabilities = __calculate_probabilities_by_gaussians(svectors, gaussians, powers, em_reserve=em_reserve)
     # Should powers be calculated before or after probabilities?
     
     weights = __probabilities_to_weights(probabilities)
@@ -78,12 +78,12 @@ def __get_gaussian_powers_from_weights(probabilities):
     return powers
 
 
-def __calculate_probabilities_by_gaussians(svectors, gaussians, powers):
+def __calculate_probabilities_by_gaussians(svectors, gaussians, powers, em_reserve=0):
     probabilities = []
     for i in range(len(gaussians)):
         probabilities_from_single_gaussian = []
         for svec in iter(svectors):
-            probabilities_from_single_gaussian.append(powers[i] * gaussians[i].get_probability_for_position(svec.matrix()))
+            probabilities_from_single_gaussian.append(powers[i] * gaussians[i].get_probability_for_position(svec.matrix(), em_reserve=em_reserve))
         probabilities.append(probabilities_from_single_gaussian)
     return probabilities
 

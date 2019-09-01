@@ -6,13 +6,13 @@ class Model:
         self.__commands = commands
 
     @classmethod
-    def train_model_from_mfccbank(cls, mfccbank, em_gaussians, em_iterations):
+    def train_model_from_mfccbank(cls, mfccbank, em_gaussians, em_iterations, em_reserve=0):
         commands = []
         print("Start training!")
         count_phrases = mfccbank.count_phrases()
         print("Commands to train: %d" % count_phrases)
         for i in range(count_phrases):
-            commands.append(Command.init_from_mfccphrase(mfccbank.get_phrase(i), em_gaussians, em_iterations))
+            commands.append(Command.init_from_mfccphrase(mfccbank.get_phrase(i), em_gaussians, em_iterations, em_reserve=em_reserve))
             print("Trained commands: %d/%d" % (i+1, count_phrases))
         return Model(commands)
 
@@ -22,7 +22,7 @@ class Model:
         return
 
 
-    def adapt(self, mfccbank):
+    def adapt(self, mfccbank, em_reserve=0):
         passed = 0
         not_passed = 0
 
@@ -34,7 +34,7 @@ class Model:
             mfccs_count = phrase.count_mfccs()
             for m_id in range(mfccs_count):
                 mfcc = phrase.get_mfcc(m_id)
-                result = self.__match_mfcc(mfcc)
+                result = self.__match_mfcc(mfcc, em_reserve=em_reserve)
                 if expected_name == result:
                     print("Matched correctly!")
                     passed += 1
@@ -45,11 +45,11 @@ class Model:
 
 
     # TODO: Refactor this. Do not rely on list index or at least make it in separate function.
-    def __match_mfcc(self, mfcc):
+    def __match_mfcc(self, mfcc, em_reserve=0):
         sv = SuperVector.init_from_mfcc(mfcc)
         results = []
         for com in iter(self.__commands):
-            results.append(com.get_probability_of_this_command(sv.matrix()))
+            results.append(com.get_probability_of_this_command(sv.matrix(), em_reserve=em_reserve))
 
         max_value = max(results)
         # TODO: Watch out for floats!!! :O

@@ -42,8 +42,8 @@ class Gaussian:
 
 
     # TODO Name it correctly
-    def get_probability_for_position(self, pos):
-        return self.__g.pdf(pos)
+    def get_probability_for_position(self, pos, em_reserve=0):
+        return self.__g.pdf(pos, reserve=em_reserve)
 
 
     def get_mean(self):
