@@ -1,4 +1,4 @@
-from scipy.stats import multivariate_normal as mvn
+from src.diagonal_multivariate import DiagonalMultivariateNormal
 import random
 import numpy as np
 
@@ -10,13 +10,7 @@ class Gaussian:
         self.__mean = mean
         self.__cov = cov
         self.__validate()
-        try:
-            self.__normal = mvn(mean, cov, allow_singular=True)
-        except ValueError:
-            print(cov)
-            raise IOError
-
-        
+        self.__g = DiagonalMultivariateNormal(mean, cov)
 
 
     def __validate(self):
@@ -26,36 +20,30 @@ class Gaussian:
             raise Gaussian.ZeroDimensionsException
         if len(self.__mean.shape) != 1:
             raise Gaussian.MeanMatrixIsNotSingleDimensionedException
-        if len(self.__cov.shape) != 2:
-            raise Gaussian.CovarianceMatrixIsNotTwoDimensional
-        if self.__cov.shape[0] != self.__cov.shape[1]:
-            raise Gaussian.CovarianceMatrixIsNotSquaredException
+        if len(self.__cov.shape) != 1:
+            raise Gaussian.CovarianceMatrixIsNotDimensionedException
         dimensions = len(self.__cov)
-        for i in range(dimensions):
-            if len(self.__cov[i]) != dimensions:
-                raise Gaussian.CovarianceMatrixIsNotSquaredException
         if len(self.__mean) != dimensions:
             raise Gaussian.MeanAndCovarianceHaveDifferentSizesException
 
 
     @classmethod
-    def generate_random_gaussian(cls, n_dimensions):
+    def generate_random_gaussian(cls, n_dimensions, one_vector):
         mean = np.array([0] * n_dimensions, dtype=float)
-        sigma = np.array([[0] * n_dimensions] * n_dimensions, dtype=float)
+        sigma = np.array([0] * n_dimensions, dtype=float)
 
         for i in range(n_dimensions):
             # TODO: Multivariate normal should accept 0 values, not require just a small value.
-            for j in range(n_dimensions):
-                sigma[i][j] = 0.001
-            mean[i] = random.randint(800, 1000) / 500
-            sigma[i][i] = random.randint(100, 1000) / 0.5
+            mean[i] = one_vector.component(i) + random.randint(-100, 100) / 50
+            # sigma[i][i] = random.randint(100, 1000) / 0.5
+            sigma[i] = 3e1
 
         return Gaussian(mean, sigma)
 
 
     # TODO Name it correctly
     def get_probability_for_position(self, pos):
-        return self.__normal.pdf(pos)
+        return self.__g.pdf(pos)
 
 
     def get_mean(self):
@@ -74,7 +62,7 @@ class Gaussian:
             return False
         if sum(abs(self.__mean - gaussian.get_mean())) > tolerance:
             return False
-        if sum(sum(abs(self.__cov - gaussian.get_covariance()))) > tolerance:
+        if sum(abs(self.__cov - gaussian.get_covariance())) > tolerance:
             return False
 
         return True
@@ -84,7 +72,7 @@ class Gaussian:
         pass
 
 
-    class CovarianceMatrixIsNotTwoDimensional(Exception):
+    class CovarianceMatrixIsNotDimensionedException(Exception):
         pass
 
 

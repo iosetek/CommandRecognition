@@ -28,7 +28,7 @@ class TestEM(unittest.TestCase):
         second_list = []
         self.assertTrue(are_gaussians_equal(first_list, second_list))
 
-        cov = np.array([[3, 0], [0, 2]], dtype=float)
+        cov = np.array([3, 2], dtype=float)
         gaussian_A = Gaussian(np.array([3, 5], dtype=float), cov)
         gaussian_B = Gaussian(np.array([5, 3], dtype=float), cov)
         gaussian_C = Gaussian(np.array([4, 4], dtype=float), cov)
@@ -91,11 +91,7 @@ class TestEM(unittest.TestCase):
         gaussians = em.estimate_n_gaussians(svectors, 1, 1)
 
         expected_mean = np.array([2, 4, 1.5], dtype=float)
-        expected_cov = np.array([
-            [1,     0,      0],
-            [0,     1,      0],
-            [0,  0,   0.25]
-        ], dtype=float)
+        expected_cov = np.array([1, 1, 0.25], dtype=float)
 
         expected_gaussians = [Gaussian(expected_mean, expected_cov)]
 
@@ -119,8 +115,8 @@ class TestEM(unittest.TestCase):
         expected_first_mean = np.array([1, 1], dtype=float)
         expected_second_mean = np.array([5, 5], dtype=float)
 
-        expected_first_cov = np.array([[1, 0], [0, 1]], dtype=float)
-        expected_second_cov = np.array([[0.4, 0], [0, 0.4]], dtype=float)
+        expected_first_cov = np.array([1, 1], dtype=float)
+        expected_second_cov = np.array([0.4, 0.4], dtype=float)
 
         expected_gaussians = [Gaussian(expected_first_mean, expected_first_cov), 
             Gaussian(expected_second_mean, expected_second_cov)]
@@ -152,8 +148,8 @@ class TestEM(unittest.TestCase):
         expected_first_mean = np.array([1, 1, 1], dtype=float)
         expected_second_mean = np.array([5, 5, 5], dtype=float)
 
-        expected_first_cov = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=float)
-        expected_second_cov = np.array([[0.285714, 0, 0], [0, 0.285714, 0], [0, 0, 0.285714]], dtype=float)
+        expected_first_cov = np.array([1, 1, 1], dtype=float)
+        expected_second_cov = np.array([0.285714, 0.285714, 0.285714], dtype=float)
 
         expected_gaussians = [Gaussian(expected_first_mean, expected_first_cov), 
             Gaussian(expected_second_mean, expected_second_cov)]
@@ -183,9 +179,9 @@ class TestEM(unittest.TestCase):
         expected_second_mean = np.array([8, 8], dtype=float)
         expected_third_mean = np.array([5, 5], dtype=float)
 
-        expected_first_cov = np.array([[1, 0], [0, 1]], dtype=float)
-        expected_second_cov = np.array([[1, 0], [0, 1]], dtype=float)
-        expected_third_cov = np.array([[0.4, 0], [0, 0.4]], dtype=float)
+        expected_first_cov = np.array([1, 1], dtype=float)
+        expected_second_cov = np.array([1, 1], dtype=float)
+        expected_third_cov = np.array([0.4, 0.4], dtype=float)
 
         expected_gaussians = [Gaussian(expected_first_mean, expected_first_cov), 
             Gaussian(expected_second_mean, expected_second_cov),

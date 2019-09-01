@@ -21,7 +21,7 @@ class NoVarianceException(Exception):
 def estimate_n_gaussians(svectors, n_gaussians, iterations):
     __validate_vectors(svectors)
 
-    gaussians = __generate_random_gaussians(n_gaussians, svectors[0].dimensions())
+    gaussians = __generate_random_gaussians(n_gaussians, svectors[0].dimensions(), svectors[0])
 
     powers = [1] * len(gaussians)
 
@@ -42,10 +42,10 @@ def __validate_vectors(svectors):
             raise DifferentNumberOfDimensionsException
 
 
-def __generate_random_gaussians(n_gaussians, n_dimensions):
+def __generate_random_gaussians(n_gaussians, n_dimensions, one_vector):
     gaussians = []
     for _ in range(n_gaussians):
-        gaussians.append(Gaussian.generate_random_gaussian(n_dimensions))
+        gaussians.append(Gaussian.generate_random_gaussian(n_dimensions, one_vector))
     return gaussians
 
 
@@ -120,13 +120,13 @@ def __super_vectors_mean(svectors, weights):
 def __super_vectors_sigma(svectors, mean, weights):
     dimensions = svectors[0].dimensions()
     values_from_dimensions = __supervectors_to_array_of_values_for_each_dimension(svectors)
-    sigma = np.array([[0] * dimensions] * dimensions, dtype=float)
+    sigma = np.array([0] * dimensions, dtype=float)
     for i in range(dimensions):
-        sigma[i][i] = __weighted_variance(mean[i], values_from_dimensions[i], weights)
-        if math.isclose(sigma[i][i], 0, abs_tol=3.0e-20):
+        sigma[i] = __weighted_variance(mean[i], values_from_dimensions[i], weights)
+        if math.isclose(sigma[i], 0, abs_tol=3.0e-20):
             # print(sigma[i][i])
-            # raise NoVarianceException
-            sigma[i][i] = 3.0e-20
+            raise NoVarianceException
+            # sigma[i] = 3.0e-20
     return sigma
 
 
