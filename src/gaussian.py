@@ -1,6 +1,7 @@
 from src.diagonal_multivariate import DiagonalMultivariateNormal
 import random
 import numpy as np
+from bigfloat import BigFloat
 
 class Gaussian:
     """
@@ -29,8 +30,8 @@ class Gaussian:
 
     @classmethod
     def generate_random_gaussian(cls, n_dimensions, one_vector):
-        mean = np.array([0] * n_dimensions, dtype=float)
-        sigma = np.array([0] * n_dimensions, dtype=float)
+        mean = np.array([BigFloat.exact("0", precision=110)] * n_dimensions)
+        sigma = np.array([BigFloat.exact("0", precision=110)] * n_dimensions)
 
         for i in range(n_dimensions):
             # TODO: Multivariate normal should accept 0 values, not require just a small value.
@@ -42,8 +43,8 @@ class Gaussian:
 
 
     # TODO Name it correctly
-    def get_probability_for_position(self, pos, em_reserve=0):
-        return self.__g.pdf(pos, reserve=em_reserve)
+    def get_probability_for_position(self, pos):
+        return self.__g.pdf(pos)
 
 
     def get_mean(self):
@@ -66,6 +67,39 @@ class Gaussian:
             return False
 
         return True
+
+
+    def to_json_object(self):
+        return {
+            Gaussian.__MEAN: self.__list_to_json_list(self.__mean),
+            Gaussian.__SIGMA: self.__list_to_json_list(self.__cov)
+        }
+
+
+    @classmethod
+    def from_json_obj(cls, obj):
+        return Gaussian(
+            cls.__json_list_to_numpy_list(obj[Gaussian.__MEAN]),
+            cls.__json_list_to_numpy_list(obj[Gaussian.__SIGMA])
+        )
+        
+
+    def __list_to_json_list(self, oldList):
+        jsonList = []
+        for v in iter(oldList):
+            jsonList.append({
+                Gaussian.__VALUE: v.__str__(),
+                Gaussian.__PRECISION: v.precision()
+            })
+        return jsonList
+
+
+    @classmethod
+    def __json_list_to_numpy_list(self, jsonList):
+        newList = []
+        for v in iter(jsonList):
+            newList.append(BigFloat.exact(v[Gaussian.__VALUE], precision=v[Gaussian.__PRECISION]))
+        return np.array(newList)
 
     
     class ZeroDimensionsException(Exception):
@@ -90,3 +124,9 @@ class Gaussian:
 
     class MeanOrCovarianceIsNotNumpyArrayException(Exception):
         pass
+
+
+    __MEAN = "mean"
+    __SIGMA = "sigma"
+    __PRECISION = "precision"
+    __VALUE = "value"

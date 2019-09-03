@@ -1,6 +1,8 @@
 from scipy.stats import multivariate_normal as mvn
 import numpy as np
 import math
+from bigfloat import BigFloat
+import bigfloat
 
 class DiagonalMultivariateNormal:
     def __init__(self, mean, sigma):
@@ -10,14 +12,14 @@ class DiagonalMultivariateNormal:
         # Used for parameter validation purpose
         mvn(mean, sigma)
     
-    def pdf(self, pos, reserve=0):
-        return self.__calculate_fraction(reserve) * self.__calculate_exp_function(pos)
+    def pdf(self, pos):
+        return self.__calculate_fraction() * self.__calculate_exp_function(pos)
 
 
     def __calculate_exp_function(self, pos):
         diffs = self.__diff_between_mean_and_pos(pos)
         out_matrix = self.__inversed_sigma_matrix_by_diffs(diffs)
-        return math.exp(-0.5 * self.__diffs_by_the_result_output(diffs, out_matrix))
+        return bigfloat.exp(-0.5 * self.__diffs_by_the_result_output(diffs, out_matrix))
 
         
 
@@ -47,31 +49,21 @@ class DiagonalMultivariateNormal:
         return np.array(pos, dtype=float) - np.array(self.__mean, dtype=float)
 
 
-    def __calculate_fraction(self, reserve):
-        # This is so user could set reserve for actual 10^x
-        reserve *= 2
-        (powered_pi, reserve) = self.__double_pi_powered_by(self.__d, reserve)
-        return (10 ** (reserve/2))/math.sqrt((powered_pi * self.__multiply_sigma()))
+    def __calculate_fraction(self):
+        powered_pi = self.__double_pi_powered_by(self.__d)
+        return BigFloat.exact('1', precision=110)/bigfloat.sqrt((powered_pi * self.__multiply_sigma()))
 
 
-    def __double_pi_powered_by(self, value, reserve):
+    def __double_pi_powered_by(self, value):
         doubled = 2 * math.pi
-        result = 1.0
+        result = BigFloat.exact('1', precision=110)
         for _ in range(value):
-            okay = False
-            while not okay:
-                old_result = result
-                result *= doubled
-                if result == float("inf"):
-                    result = old_result / (10**4)
-                    reserve -= 4
-                else:
-                    okay = True
-        return (result, reserve)
+            result *= doubled
+        return result
 
 
     def __multiply_sigma(self):
-        result = 1
+        result = BigFloat.exact('1', precision=110)
         for v in iter(self.__sigma):
             result *= v
         return result

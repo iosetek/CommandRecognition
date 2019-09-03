@@ -18,14 +18,16 @@ def prepare_model(config):
         mfccbank.save_mfccbank(config.training_supervectors)
     elif config.start_from == config.USE_READY_MFCC_BANK:
         mfccbank = MFCCBank.load_mfccbank(config.training_supervectors)
-    model = Model.train_model_from_mfccbank(mfccbank, config.gaussians_count, config.em_repeats, em_reserve=config.em_reserve)
-    model.adapt(mfccbank, em_reserve=config.em_reserve)
+    model = Model.train_model_from_mfccbank(mfccbank, config.gaussians_count, config.em_repeats)
+    model.adapt(mfccbank)
+    # TODO: Change location
+    model.save_to_file("temporaryfile.json")
     return model
 
 
 def test_model(model, testingPaths, config):
     mfccbank = __parse_paths(testingPaths, config)
-    model.adapt(mfccbank, em_reserve=config.em_reserve)
+    model.adapt(mfccbank)
     # return results
 
 

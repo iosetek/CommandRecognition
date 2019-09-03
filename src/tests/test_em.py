@@ -187,6 +187,14 @@ class TestEM(unittest.TestCase):
             Gaussian(expected_second_mean, expected_second_cov),
             Gaussian(expected_third_mean, expected_third_cov)]
 
+        print("expected")
+        print(expected_gaussians[0].get_mean())
+        print(expected_gaussians[0].get_covariance())
+
+        print("actual")
+        print(gaussians[0].get_mean())
+        print(gaussians[0].get_covariance())
+
         self.assertTrue(are_gaussians_equal(gaussians, expected_gaussians))
 
 

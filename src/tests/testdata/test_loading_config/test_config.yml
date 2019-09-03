@@ -10,4 +10,3 @@ config:
   em_repeats: 20
   discretization_step: 50
   gaussians_count: 2
-  em_reserve: 0
